@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { indianCities } from '../../data/indianCities';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
+import Button from '../ui/Button';
 
 const CitiesSection: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState(indianCities[0]);
+  const navigate = useNavigate();
 
   return (
     <section className="py-16 bg-white">
@@ -70,6 +73,17 @@ const CitiesSection: React.FC = () => {
 
               <div className="p-6">
                 <p className="text-gray-600 mb-6">{selectedCity.description}</p>
+
+                <div className="mb-8">
+                  <Button
+                    onClick={() => navigate(`/city/${encodeURIComponent(selectedCity.name)}`)}
+                    variant="primary"
+                    icon={<ExternalLink className="h-5 w-5" />}
+                    iconPosition="right"
+                  >
+                    Explore {selectedCity.name} & Discover Culture
+                  </Button>
+                </div>
 
                 <h3 className="text-xl font-bold mb-4">Famous Places</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

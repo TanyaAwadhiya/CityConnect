@@ -61,13 +61,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ mobile }) => {
     }
   };
 
-  const handleCityClick = (cityId: string) => {
+  const handleCityClick = (city: typeof indianCities[0]) => {
     setSearchQuery('');
     setShowSuggestions(false);
     if (!mobile) {
       setIsExpanded(false);
     }
-    navigate(`/cities/${cityId}`);
+    navigate(`/city/${encodeURIComponent(city.name)}`);
   };
   
   if (mobile) {
@@ -115,7 +115,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ mobile }) => {
               filteredCities.map(city => (
                 <button
                   key={city.id}
-                  onClick={() => handleCityClick(city.id)}
+                  onClick={() => handleCityClick(city)}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                 >
                   <div className="font-medium">{city.name}</div>
@@ -190,7 +190,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ mobile }) => {
             filteredCities.map(city => (
               <button
                 key={city.id}
-                onClick={() => handleCityClick(city.id)}
+                onClick={() => handleCityClick(city)}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
               >
                 <div className="font-medium">{city.name}</div>

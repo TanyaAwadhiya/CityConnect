@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Bell, Search, MapPin, LogIn, Globe } from 'lucide-react';
+import { Menu, X, Bell, LogIn, Globe, LogOut, User } from 'lucide-react';
 import { NavLink } from '../ui/NavLink';
 import SearchBar from '../ui/SearchBar';
 import { useAlerts } from '../../hooks/useSupabase';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { alerts, loading: alertsLoading } = useAlerts();
-  
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 50);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -33,18 +37,29 @@ const Header: React.FC = () => {
     setIsNotificationOpen(false);
   };
 
-  // Close notifications when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       if (isNotificationOpen && !target.closest('.notification-dropdown')) {
         closeNotifications();
       }
+      if (isProfileOpen && !target.closest('.profile-dropdown')) {
+        setIsProfileOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isNotificationOpen]);
+  }, [isNotificationOpen, isProfileOpen]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>
@@ -56,7 +71,7 @@ const Header: React.FC = () => {
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-blue-800">City Connect</h1>
           </Link>
-          
+
           <nav className="hidden md:flex items-center space-x-6">
             <NavLink to="/" label="Home" />
             <NavLink to="/news" label="News" />
@@ -64,11 +79,11 @@ const Header: React.FC = () => {
             <NavLink to="/services" label="Services" />
             <NavLink to="/contact" label="Contact" />
           </nav>
-          
+
           <div className="hidden md:flex items-center space-x-4">
             <SearchBar />
             <div className="relative notification-dropdown">
-              <button 
+              <button
                 onClick={toggleNotifications}
                 className="relative p-2 text-gray-700 hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
                 aria-label="Notifications"
@@ -82,13 +97,12 @@ const Header: React.FC = () => {
                 )}
               </button>
 
-              {/* Notification Dropdown */}
               {isNotificationOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                   </div>
-                  
+
                   <div className="max-h-96 overflow-y-auto">
                     {alertsLoading ? (
                       <div className="p-4 text-center text-gray-500">
@@ -127,7 +141,7 @@ const Header: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {alerts.length > 0 && (
                     <div className="p-4 border-t border-gray-200">
                       <button
@@ -141,16 +155,49 @@ const Header: React.FC = () => {
                 </div>
               )}
             </div>
-            <Link 
-              to="/login"
-              className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md transition-colors"
-            >
-              <LogIn className="h-5 w-5" />
-              <span>Sign In</span>
-            </Link>
+
+            {user ? (
+              <div className="relative profile-dropdown">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-sm">{user.email?.split('@')[0]}</span>
+                </button>
+
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-4 border-b border-gray-200">
+                      <p className="text-sm text-gray-900 font-medium">{user.email}</p>
+                    </div>
+                    <div className="py-2">
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-red-700 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span className="text-sm">Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                <LogIn className="h-5 w-5" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
-          
-          <button 
+
+          <button
             className="md:hidden p-2 text-gray-700 hover:text-blue-800"
             onClick={toggleMenu}
             aria-label="Toggle menu"
@@ -159,7 +206,7 @@ const Header: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-md">
@@ -169,7 +216,7 @@ const Header: React.FC = () => {
             <NavLink to="/events" label="Events" mobile onClick={() => setIsMenuOpen(false)} />
             <NavLink to="/services" label="Services" mobile onClick={() => setIsMenuOpen(false)} />
             <NavLink to="/contact" label="Contact" mobile onClick={() => setIsMenuOpen(false)} />
-            
+
             {/* Mobile Notifications */}
             <div className="border-t border-gray-200 pt-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Notifications</h3>
@@ -195,20 +242,33 @@ const Header: React.FC = () => {
                 <p className="text-sm text-gray-500">No notifications</p>
               )}
             </div>
-            
+
             <SearchBar mobile />
-            <Link 
-              to="/login"
-              className="flex items-center justify-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <LogIn className="h-5 w-5" />
-              <span>Sign In</span>
-            </Link>
+            {user ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors w-full"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Sign Out</span>
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center justify-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <LogIn className="h-5 w-5" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
       )}
-      
+
       {/* Alert banner */}
       {alerts.length > 0 && (
         <div className={`w-full py-2 ${alerts[0].type === 'warning' ? 'bg-amber-500' : alerts[0].type === 'error' ? 'bg-red-500' : alerts[0].type === 'success' ? 'bg-green-500' : 'bg-blue-500'} text-white`}>
