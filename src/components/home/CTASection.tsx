@@ -1,8 +1,10 @@
 import React from 'react';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import Button from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 const CTASection: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -56,12 +58,14 @@ const CTASection: React.FC = () => {
               <Button
                 variant="outline"
                 className="border-white text-white hover:bg-white/10"
+                onClick={() => navigate('/services')}
               >
                 View Directory
               </Button>
               <Button
                 variant="primary"
                 className="bg-white text-blue-400 hover:bg-blue-50"
+                onClick={() => navigate('/contact')}
               >
                 Report an Issue
               </Button>

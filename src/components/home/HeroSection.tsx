@@ -1,38 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import Button from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-300 via-blue-400 to-blue-500 overflow-hidden">
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-          alt="City skyline" 
+        <img
+          src="https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          alt="City skyline"
           className="w-full h-full object-cover opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-400/50 to-blue-500/90" />
       </div>
-      
+
       <div className="container mx-auto px-4 py-20 relative z-10 text-center">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
           Welcome to <span className="text-blue-100">City Connect</span>
         </h1>
-        
+
         <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-3xl mx-auto">
           Your gateway to exploring Indian cities. Discover places, culture, and connect with communities across India.
         </p>
-        
+
         <div className="max-w-xl mx-auto mb-12">
-          <form className="relative">
-            <input 
+          <form onSubmit={handleSearch} className="relative">
+            <input
               type="text"
               placeholder="What are you looking for?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white/90 backdrop-blur-sm rounded-full pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
             />
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-800" />
-            <button 
+            <button
               type="submit"
               className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-800 hover:bg-blue-900 text-white px-5 py-2 rounded-full transition-colors"
             >
@@ -40,18 +53,20 @@ const HeroSection: React.FC = () => {
             </button>
           </form>
         </div>
-        
+
         <div className="flex flex-wrap justify-center gap-4">
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             size="lg"
+            onClick={() => navigate('/news')}
           >
             Explore Indian Cities
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="lg"
             className="bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white/20"
+            onClick={() => navigate('/events')}
           >
             Discover Culture
           </Button>

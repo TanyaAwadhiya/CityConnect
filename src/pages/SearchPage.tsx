@@ -26,7 +26,7 @@ const SearchPage: React.FC = () => {
           {filteredCities.map(city => (
             <Link
               key={city.id}
-              to={`/cities/${city.id}`}
+              to={`/city/${encodeURIComponent(city.name)}`}
               className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="relative h-48">
